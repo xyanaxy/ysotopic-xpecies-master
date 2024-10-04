@@ -1,18 +1,116 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
- 
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>grid</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>grid exercise</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            gap: 2px;
+            width: 90vmin;
+            height: 90vmin;
+            max-width: 500px;
+            max-height: 500px;
+        }
+        .cell {
+            width: 100%;
+            height: 100%;
+            background-color: lightgrey;
+        }
+        .visited {
+            background-color: rgb(255, 147, 6);
+        }
+        .current {
+            background-color: black;
+        }
+        .text {
+          font-size: 50px;
+          font-family: 'Courier New', Courier, monospace;
+          font-weight: 800;
+        }
+        .text p {
+
+        }
+    </style>
 </head>
-
 <body>
-  <section>
-    <textarea id="text" name="text" >soon</textarea> 
-    </section> 
-</body>
+   <div class="text">
+      <p>palac</p>
+   </div>
+    <div class="grid" id="grid"></div>
 
+    <script>
+        const gridSize = 10;
+        const gridElement = document.getElementById('grid');
+        let currentX = Math.floor(Math.random() * gridSize);
+        let currentY = Math.floor(Math.random() * gridSize);
+        let lastDirection = null;
+
+        // Create the grid
+        const cells = [];
+        for (let y = 0; y < gridSize; y++) {
+            for (let x = 0; x < gridSize; x++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.dataset.x = x;
+                cell.dataset.y = y;
+                gridElement.appendChild(cell);
+                cells.push(cell);
+            }
+        }
+
+        function updateGrid() {
+            cells.forEach(cell => cell.classList.remove('current'));
+            const currentCell = cells.find(cell => cell.dataset.x == currentX && cell.dataset.y == currentY);
+            currentCell.classList.add('current', 'visited');
+        }
+
+        function getNextMove() {
+            const directions = [
+                { x: 0, y: -1 }, // up
+                { x: 1, y: 0 }, // right
+                { x: 0, y: 1 }, // down
+                { x: -1, y: 0 } // left
+            ];
+
+            if (lastDirection !== null) {
+                directions.splice((lastDirection + 2) % 4, 1);
+            }
+
+            const validDirections = directions.filter(dir => {
+                const newX = currentX + dir.x;
+                const newY = currentY + dir.y;
+                return newX >= 0 && newX < gridSize && newY >= 0 && newY < gridSize;
+            });
+
+            const nextDirection = validDirections[Math.floor(Math.random() * validDirections.length)];
+            lastDirection = directions.indexOf(nextDirection);
+
+            return nextDirection;
+        }
+
+        function step() {
+            const nextMove = getNextMove();
+            currentX += nextMove.x;
+            currentY += nextMove.y;
+            updateGrid();
+        }
+
+        // Start the random walk with a click
+        updateGrid();
+        document.body.addEventListener('click', step);
+    </script>
+</body>
 </html>
